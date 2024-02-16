@@ -1,28 +1,11 @@
-
 ## Exercise 2
 
-We generate samples from the asked distributions and plot for each of
-the generated samples the histogram, boxplot and QQ-plot:
+**a)**
 
-```{r, fig.height=2.6, fig.width=6}
-par(mfrow=c(1,3)) # two plots next each other
-sample=rlnorm(10000,2,2) # from the lognormal distribution with mu=sigma=2
-hist(sample,xlim=c(0,100),breaks=1000) # hist(sample) will not look good, why?
-# to see the breaks: hist(sample,xlim=c(0,100),breaks=1000)$breaks
-boxplot(sample) # a lot of outliers
-qqnorm(sample) # of course, not normal
+**b)**
 
-sample=rbinom(40,50,0.25) # from the binomial distribution with n=50 and p=0.25
-hist(sample);boxplot(sample);qqnorm(sample) # looks like normal
+**c)**
 
-sample=runif(60,-2,3) #from the uniform distribution on the interval [-2,3]
-hist(sample);boxplot(sample);qqnorm(sample) # of course, not normal
+**d)**
 
-sample=rpois(200,350) #from the Poisson distribution with lambda = 350
-hist(sample);boxplot(sample);qqnorm(sample) # looks like normal
-```
-
-All but lognormal are symmetric (possibly not around zero), binomial and
-Poisson look like normal. Small sample sizes (10,40,60) show noise.
-Histograms are more stable and give better approximation of the true
-density for sufficiently large sample sizes.
+**e)**

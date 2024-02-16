@@ -1,35 +1,11 @@
-
 ## Exercise 3
 
 **a)**
 
 **b)**
 
-## Exercise 4
-
-
-**a)-b)** In these both cases the null hypothesis H0 holds because
-`mu=nu=180`.
-
-## a)
-
-## b)
-
-
 **c)**
 
+**d)**
 
-**d)** The null hypothesis H0 holds in a) and b) as `mu=nu`. Under H0,
-p-values are distributed uniformly on [0,1]. Hence the events {p\<0.05}
-and {p\<0.1} should occur approximately in 5% and 10% of cases
-respectively, and histograms of p-values should be close to uniform on
-[0,1]. In b) the approximations should be better because the variance is
-smaller.
-
-In c) H0 does not hold (because `mu>nu`), so p-values are not uniformly
-distributed and `mean(p<0.05)` gives approximately the values of the
-power function at point `mu-nu=180-175=5`, which should approach 1 for a
-good test.
-
-All these claims are confirmed by the simulations results in a), b) and
-c).
+**e)**
