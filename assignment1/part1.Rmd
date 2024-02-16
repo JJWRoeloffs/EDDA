@@ -1,0 +1,162 @@
+## Exercise 1
+
+**a)** 
+```{r include=FALSE}
+getwd()
+Ice_cream.1 <- read.csv("./data/Ice_cream-1.csv")
+mean_video <- mean(Ice_cream.1$video)
+``` 
+
+From the given dataset $icecream.csv$ the mean $\mu$ is `r mean_video`
+
+```{r, echo=FALSE}
+# Create a histogram
+par(mfrow=c(1,2))
+hist(
+  Ice_cream.1$video,
+  xlim = c(20, 80),
+  xlab="Value of video",
+  ylim = c(0, 40),
+  main="Histogram of video"
+)
+qqnorm(Ice_cream.1$video, pch = 1, frame = FALSE, ylim = c(20, 80), main="QQ-plot of video")
+qqline(Ice_cream.1$video, col = "steelblue", lwd = 2)
+``` 
+
+When analyzing the histogram and QQ-plot above the assumption of a normal distribution can be assumed since the histogram is bell shaped and the QQ-plot follows a straight line in comparison to the blue reference line.
+
+```{r include=FALSE}
+Ice_cream.1 <- read.csv("./data/Ice_cream-1.csv")
+mean_video <- mean(Ice_cream.1$video)
+sd_video <- sd(Ice_cream.1$video)
+cl <- 0.97
+z_score <- qnorm((1 + cl) / 2)
+margin_of_error <- z_score * (sd_video / sqrt(length(Ice_cream.1$video)))
+
+lower_bound <- mean_video - margin_of_error
+upper_bound <- mean_video + margin_of_error
+``` 
+The 97% Confidence Interval for the Mean  $\mu$ is `r mean_video` has a lower bound of `r lower_bound` and an upper bound of `r upper_bound`
+
+```{r include=FALSE}
+# Load the pwr package
+library(pwr)
+
+# Set the parameters
+confidence_level <- 0.97
+maximum_width <- 3
+sd_video <- sd(Ice_cream.1$video)
+# Calculate the Z-score for the given confidence level
+z_score <- qnorm((1 + confidence_level) / 2)
+
+# Calculate required sample size
+required_sample_size <- (z_score * sd_video / (maximum_width / 2))^2
+``` 
+Required Sample Size: `r ceiling(required_sample_size)`
+
+
+
+We generate two samples of sizes 100 and $100000$ from a standard normal distribution N(0,1) as follows, and then make histograms and QQ-plots for the both
+samples.
+
+```{r, fig.height=3, fig.width=6}
+sample1 <-rnorm(100)
+sample2 <-rnorm(100000)
+par(mfrow=c(1,2)); hist(sample1); hist(sample2) # two histograms next to each other
+qqnorm(sample1); qqnorm(sample2) # two QQ-plots next to each other
+```
+
+For different samples, the figures are different. The quality of the
+histogram and QQ-plot depend on the sample size. If it is small, the
+histogram varies more and the QQ-plot varies more around a straight line
+whereas for large samples size the histogram is very stable and close to
+the true density, and the QQ-plot is straight in the middle with just
+some variation in the corners. The values of `mean` and `sd` only
+influence the scales on the axes, not the straightness of the line in
+the QQ-plot.
+
+Now, we compute the means and standard deviations for the both samples,
+and summarize the results in the table.
+
+| Parameters | Est. for sample n=100             | Est. for sample n=100000          |
+|----------------|--------------------------|------------------------------|
+| mean=0     | `mean(sample1)`=`r mean(sample1)` | `mean(sample2)`=`r mean(sample2)` |
+| sd=1       | `sd(sample1)`=`r sd(sample1)`     | `sd(sample2)`=`r sd(sample2)`     |
+
+The estimated mean and standard deviation are also clearly better for
+the second sample. This is not surprising as the second sample is of a
+much bigger size, i.e., containing much more data.
+
+**b)** Given Z has a standard normal distribution, we need to compute
+the following probabilities: P(Z\<2)=`pnorm(2)`=`r pnorm(2)`,
+P(Z\>-0.5)=`1-pnorm(-0.5)`=`r 1-pnorm(-0.5)`,
+P(-1\<Z\<2)=`pnorm(2)-pnorm(-1)`=`r pnorm(2)-pnorm(-1)`.
+
+**c)** For Z\~N(0,1), the probabilities P(Z\<2)=`r pnorm(2)`,
+P(X\>-0.5)=`r 1-pnorm(-0.5)` and P(-1 \< Z \< 2)=`r pnorm(2)-pnorm(-1)`
+from b) can be estimated by using the data from a) as follows:
+
+```{r, collapse=T}
+p1=sum(sample1<2)/length(sample1) # estimate of P(Z<2) for sample 1 with n=100
+p2=sum(sample2<2)/length(sample2) # estimate of P(Z<2) for sample 2 with n=100000
+p3=sum(sample1>-0.5)/length(sample1) # estimates of P(Z>-0.5) for sample 1
+p4=sum(sample2>-0.5)/length(sample2) # estimates of P(Z>-0.5) for sample 2
+p5=sum(sample1>-1&sample1<2)/length(sample1) # estimate of P(-1<Z<2) for sample 1
+p6=sum(sample2>-1&sample2<2)/length(sample2) # estimate of P(-1<Z<2) for sample 2
+c(p1,p2,p3,p4,p5,p6) # print all the estimates
+```
+
+Summarize the results in the table. The 2nd and 3d columns in this table
+are the estimates of the corresponding theoretical probabilities from
+b).
+
+| Probabilities from b)              | Est. for sample n=100 | Est. for sample n=100000 |
+|----------------|--------------------------|------------------------------|
+| P(Z\<2)=`r pnorm(2)`               | `p1`=`r p1`           | `p2`=`r p2`              |
+| P(Z\>-0.5)=`r 1-pnorm(-0.5)`       | `p3`=`r p3`           | `p4`=`r p4`              |
+| P(-1\<Z\<2)=`r pnorm(2)-pnorm(-1)` | `p5`=`r p5`           | `p6`=`r p6`              |
+
+The estimates based on the second sample are clearly better, because the
+second sample is larger.
+
+**d)** As in a), we first generate the samples
+`sample1=rnorm(100,mean=3,sd=2)`, `r sample1=rnorm(100,3,2)`
+`sample2=rnorm(100000,3,2)`. `r sample2=rnorm(100000,mean=3,sd=2)` Next,
+we estimate the parameters `mean` and `sd` and construct histrograms for
+the both samples.
+
+| Parameters | Est. for sample n=100             | Est. for sample n=100000          |
+|----------------|--------------------------|------------------------------|
+| mean=3     | `mean(sample1)`=`r mean(sample1)` | `mean(sample2)`=`r mean(sample2)` |
+| sd=2       | `sd(sample1)`=`r sd(sample1)`     | `sd(sample2)`=`r sd(sample2)`     |
+
+```{r, fig.height=3, fig.width=6}
+par(mfrow=c(1,2)); hist(sample1); hist(sample2)
+```
+
+As before, the estimates and histrogram for the second sample are better
+as this sample is of a larger size.
+
+For X\~N(3,4), the probabilities are now found as follows:
+P(X\<2)=`pnorm(2,mean=3,sd=2)`=`r pnorm(2,mean=3,sd=2)`,
+P(X\>-0.5)=`1-pnorm(-0.5,mean=3,sd=2)`=`r 1-pnorm(-0.5,mean=3,sd=2)`,
+P(-1\<X\<2)=`pnorm(2,3,2)-pnorm(-1,3,2)`=`r pnorm(2,3,2)-pnorm(-1,3,2)`.
+
+The value such that 95% of the outcomes is smaller than that value is
+nothing else but the 95%-quantile of the distribution N(3,4), which is
+`qnorm(0.95,mean=3,sd=2)`=`r qnorm(0.95,mean=3,sd=2)`. Notice that it
+can also be found via the 95%-quantile `qnorm(0.95)` of the standard
+normal distribution as `3+2*qnorm(0.95)`=`r 3+2*qnorm(0.95)`.
+
+**e)** Any normal variable X\~N(mu,sigma\^2) can be generated from a
+standard normally distributed Z\~N(0,1) as X=mu+sigma\*Z. We generate in
+this way a sample of size 1000 from a normal distribution with
+`mean`=-10 and `sd`=5, and verify that the sample mean and sample
+standard deviation are close to the true values `mean`=-10 and `sd`=5.
+
+```{r, collapse=T}
+sample=-10+5*rnorm(1000)
+c(mean(sample),sd(sample)) # should be close to mean=-10 and sd=5
+```
+
+

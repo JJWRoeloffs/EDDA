@@ -1,0 +1,11 @@
+
+---
+title: "Assignment 1"
+author: "Andres Garcia, Lars Grootkarzijn & Jelle Roeloffs"
+date: "Febuary 26"
+output: pdf_document
+highlight: tango
+editor_options:
+  markdown:
+    wrap: 72
+---
