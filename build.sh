@@ -13,7 +13,7 @@ R --no-restore -e 'if (!"tinytex" %in% installed.packages()[,"Package"]) {
 
 # wildcard expansions are guaranteed to be sorted alphabetically.
 # This means "header" coming before "part" is relevant
-cat $1/*.Rmd >>$1/$1.Rmd
+sed -e '$s/$/\n/' -s $1/*.Rmd >$1/$1.Rmd
 # chdir to let the data live in only one place
 #     (rstudio cd's to the .Rmd file's parent, and R -e uses current directory)
 env --chdir=$1 R --no-restore -e "rmarkdown::render('$1.Rmd', output_format = 'pdf_document')"
