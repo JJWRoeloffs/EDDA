@@ -39,6 +39,23 @@ upper_bound <- mean_video + margin_of_error
 The 97% Confidence Interval for the Mean  $\mu$ is `r mean_video` has a lower bound of `r lower_bound` and an upper bound of `r upper_bound`
 
 **b)** 
+```{r include=FALSE}
+# Assuming your data is in a variable called 'scores'
+# H0: The mean score is equal to 50
+# H1: The mean score is greater than 50
+
+# One-sample t-test
+result <- t.test(Ice_cream.1$video, alternative = "greater", mu = 50)
+
+# Print the result
+print(result)
+
+# Access confidence interval
+conf_interval <- result$conf.int
+p_value <- result$p.value
+print(conf_interval)
+``` 
+Looking at 1 a from the plots we can see a normal distribution which justifies the usage of a t-test. When doing a one sample t-test with H0: $\mu$ is equal to 50 and Ha: $\mu$ is greater than 50; the following result for the p-value is found: `r p_value`. When taking a significance level of 0.05 we can thus reject the null hypothesis and accept the alternative hypothesis $\mu$ is greater than 50. When looking at the Confidence Interval (CI) we can assume the lower bound, mean and upper bound are above 50 since the null hypothesis is rejected.
 
 **c)** 
 
