@@ -1,11 +1,86 @@
 ## Exercise 3
 
+```{r include=FALSE}
+library(lme4) 
+library(emmeans)
+cream.1 <- read.csv("./data/cream-1.txt", sep="")
+cream.1$starter <- as.factor(cream.1$starter)
+```
+
 **a)**
+
+```{r include=FALSE}
+cream.1_filtered <- cream.1[cream.1$starter %in% c(1, 2), ]
+cream.1_filtered$starter <- as.factor(cream.1_filtered$starter)
+```
+
+```{r include=FALSE}
+
+model_filtered <- lm(acidity ~ starter + batch + position, data = cream.1_filtered)
+summary(model_filtered)
+
+```
+
+```         
+starter2     -0.1500     0.6425  -0.233  0.82316
+F-statistic: 1.737 on 3 and 6 DF,  p-value: 0.2585
+```
+
+The p-value associated with starter 2 is 0.8232, while the overall p-value was 0.2585 which is greater than the common significance level of 0.05. Therefore, we do not have enough evidence to reject the null hypothesis that there is no significant difference between the effects of starter 1 and starter 2 on acidity.
+
+```{r include=FALSE}
+contrast_result <- emmeans(model_filtered, "starter", contr = "pairwise")
+contrast_result
+```
+
+```         
+ starter emmean    SE df lower.CL upper.CL
+ 1         8.42 0.454  6     7.31     9.54
+ 2         8.27 0.454  6     7.16     9.39
+ 
+contrast          estimate  SE df t.ratio p.value
+ start1 - start2  0.15    0.642 6  0.233  0.8232
+```
+
+This can also be observed by comparing the estimated marginal means. The confidence intervals for these emmeans do not overlap, which might suggest a potential difference. However, the crucial information comes from the contrast (starter1 - starter2) analysis where the p-value of 0.8232 is much higher than the common significance level of 0.05.
 
 **b)**
 
-**c)**
+First we check if any block variables are insignificant and remove them. Both batch and position where found to be insignificant.
+
+```{r include=FALSE}
+model <- lm(acidity ~ starter + batch + position, data = cream.1)
+summary(model)
+
+significance_level <- 0.05
+
+# Check if batch is insignificant
+if (summary(model)$coefficients["batch", "Pr(>|t|)"] > significance_level) {
+  model <- update(model, . ~ . - batch)
+}
+
+# Check if position is insignificant
+if (summary(model)$coefficients["position", "Pr(>|t|)"] > significance_level) {
+  model <- update(model, . ~ . - position)
+}
+
+```
+
+```{r, echo=FALSE}
+anova_result <- anova(model)
+summary(anova_result)
+```
+
+The ANOVA test results in a F value is 7.973, and the associated p-value is 0.0005168. This p-value is less than 0.05, indicating that the overall effect of the starter variable on acidity is statistically significant.
+
+```{r, echo=FALSE}
+summary(model)
+```
+
+By examining the the summary of the model, we observe for starter 4 that the coefficient estimate is 2.8100, and the p-value is 0.00118. The p-value is less than 0.05, indicating a significant effect of starter 4 on acidity.
+
+**c)** The Friedman test is often used when the assumptions of tests like ANOVA are not met. Nevertheless, the Friedman test is typically applied to repeated measures data, where each subject is measured under different conditions. Our data displayed a single observation for each combination of batch, position, and starter, rather than repeated measures within subjects.
+
+Therefore, the Friedman test might not be the most appropriate, as it assumes a one-dimensional array of measurements for each level of the treatment variable, and it tests whether there are differences in the distribution of values across these levels, so we might not have the necessary repeated measures structure for the Friedman test.
 
 **d)**
-
-**e)**
