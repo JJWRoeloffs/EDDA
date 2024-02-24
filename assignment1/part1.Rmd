@@ -23,7 +23,7 @@ qqnorm(Ice_cream.1$video, pch = 1, frame = FALSE, ylim = c(20, 80), main="QQ-plo
 qqline(Ice_cream.1$video, col = "steelblue", lwd = 2)
 ``` 
 
-When analyzing the histogram and QQ-plot above the assumption of a normal distribution can be made as the boxplot looks symmetrical, th histogram is bell shaped and the QQ-plot follows a relatively straight line.
+When analyzing the histogram and QQ-plot above the assumption of a normal distribution can be made as the boxplot looks symmetrical, the histogram is bell shaped and the QQ-plot follows a relatively straight line.
 
 ```{r include=FALSE}
 Ice_cream.1 <- read.csv("./data/Ice_cream-1.csv")
@@ -58,9 +58,99 @@ print(conf_interval)
 Looking at 1 a from the plots we can see a normal distribution which justifies the usage of a t-test. When doing a one sample t-test with H0: $\mu$ is equal to 50 and Ha: $\mu$ is greater than 50; the following result for the p-value is found: `r p_value`. When taking a significance level of 0.05 we can thus reject the null hypothesis and accept the alternative hypothesis $\mu$ is greater than 50. When looking at the Confidence Interval (CI) we can assume the lower bound, mean and upper bound are above 50 since the null hypothesis is rejected.
 
 **c)** 
+```{r include=FALSE}
+# Number of observations greater than 6
+success_count <- sum(Ice_cream.1$video > 50)
+
+# Total number of observations
+total_count <- length(Ice_cream.1$video)
+
+# Binomial test
+binom_test_result <- binom.test(success_count, total_count, p = 0.5, alternative = "greater")
+video <- sum(rank(abs(Ice_cream.1$video-50))[Ice_cream.1$video-50>0])
+
+wilcox_test_result <- wilcox.test(video, mu=50, alternative="greater")
+
+# Define the fraction and the expected proportion
+observed_fraction <- sum(Ice_cream.1$video < 42) / length(Ice_cream.1$video)
+expected_proportion <- 0.25  # the expected proportion under the null hypothesis
+
+# Perform a one-sample proportion test
+prop_test_result <- prop.test(sum(Ice_cream.1$video < 42), length(Ice_cream.1$video), p = expected_proportion, alternative = "less")
+
+# Display the test result
+prop_test_result
+``` 
+
+When using the sign test in R first of all the sum of column $video$ which is bigger then 50 have to be found which is `r success_count`. The total length of the column is `r total_count`. Now doing the Binominal test with these values and the H0 hypothesis: The median value is 50, and the Ha Hypothesis the median is greater then 50 gives a p-value of `r binom_test_result$p.value`. When taking the significance level 0.05 there can thus be concluded the null hypothesis cannot be rejected and thus that there is not enough evidence to conclude that the median value is greater than 50.
+
+When using the Wilcox signed rank test on the video column with $\mu$ = 50 and hypothesizes H0: The median value is equal to 50 and Ha: The median value is bigger then 50 the p-value found is `r wilcox_test_result$p.value`. When using the significance level 0.05 we can therefore there is not enough evidence to reject the null hypothesis that the median value is equal to 50.
+
+When comparing these tests to the tests done in $b)$ the conclusion can be made that both the median and the mean are not above 50.
+
+When using a one sample proportion test with H0: The proportion is equal to 25% or bigger and Ha: The proportion is smaller then 25% the value `r prop_test_result$p.value` is found. When using a significance level of 0.05 the null hypothesis can thus be rejected which means that the fraction of the scores less than 42 is at most 25%.
+
 
 **d)** 
+```{r include=FALSE}
+#n=length(Ice_cream.1$video); t=max(Ice_cream.1$video); t
+#B=1000; tstar=numeric(B)
+#for (i in 1:B){xstar=rexp(n,1) + tstar[i]=min(xstar)}
+#pl=sum(tstar<t)/B;pr=sum(tstar>t)/B
+#p=2*min(pl,pr); p
+``` 
+
 
 **e)** 
+```{r echo=FALSE}
+male_scores <- Ice_cream.1[Ice_cream.1$female == 1, "video"]
+female_scores <- Ice_cream.1[Ice_cream.1$female == 0, "video"]
 
+# Two-Sample t-test
+t_test_result <- t.test(male_scores, female_scores)
+
+# Mann-Whitney test
+mannwhitney_result <- wilcox.test(male_scores, female_scores)
+
+# Kolmogorov-Smirnov test
+ks_test_result <- ks.test(male_scores, female_scores)
+
+par(mfrow=c(1,2))
+qqnorm(male_scores, pch = 1, frame = FALSE, ylim = c(20, 80), main="QQ-plot of males")
+qqline(male_scores, col = "steelblue", lwd = 2)
+
+qqnorm(female_scores , pch = 1, frame = FALSE, ylim = c(20, 80), main="QQ-plot of females")
+qqline(female_scores , col = "steelblue", lwd = 2)
+``` 
+
+First, the male and female values have to be extracted into a variable using the $female$ column in the provided CSV. Secondly, using a Two-Sample t-test the hypothesizes are as followed:
+
+Null Hypothesis (H0): The mean scores of male and female students are equal.
+Alternative Hypothesis (Ha): The mean score of male students is different from female students.
+
+The resulting p-value is `r t_test_result$p.value` when using a significant level of 0.05 this thus means the null hypothesis is not rejected.
+
+Null Hypothesis (H0): There is no difference in the distribution of scores between male and female students.
+Alternative Hypothesis (H1): The distribution of scores is different between male and female students
+
+The resulting p-value is `r mannwhitney_result$p.value` when using a significant level of 0.05 this thus means the null hypothesis is not rejected.
+
+Null Hypothesis (H0): The distributions of scores for male and female students are the same.
+Alternative Hypothesis (H1): The distributions of scores for male and female students are different.
+
+The resulting p-value is `r ks_test_result$p.value` when using a significant level of 0.05 this thus means the null hypothesis is not rejected.
+
+Considering the fact that all H0 hypothesisses are accepted 
 **f)** 
+```{r echo=FALSE}
+par(mfrow=c(1,2))
+qqnorm(Ice_cream.1$video, pch = 1, frame = FALSE, ylim = c(20, 80), main="QQ-plot of video")
+qqline(Ice_cream.1$video, col = "steelblue", lwd = 2)
+
+qqnorm(Ice_cream.1$puzzle, pch = 1, frame = FALSE, ylim = c(20, 80), main="QQ-plot of puzzle")
+qqline(Ice_cream.1$puzzle, col = "steelblue", lwd = 2)
+
+correlation_result <- cor.test(Ice_cream.1$video, Ice_cream.1$puzzle, method="spearman")
+``` 
+
+When looking at the QQ-plot for puzzle it seems doubtful that it is normally distributed. Due to this reason Spearman's correlation test between the columns video and puzzle is used. The hypothessises are as followed: H0: There is no correlation between the two columns and Ha: There is correlation between the columns. the results of the Pearson’s correlation test gives a P-value of `r correlation_result$p.value`. When using a significance level of 0.05 the conclusion can be drawn that the null hypothesis can be rejected and there is thus enough evidence to conclude that the columns puzzle and video are significantly correlated, if normality is assumed.
