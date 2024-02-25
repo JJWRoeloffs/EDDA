@@ -2,10 +2,129 @@
 
 **a)**
 
+To distribute an amount of allocated observations for two-way anova for a balanced design, one could use the following function:
+
+```{r include=TRUE}
+distribute_observations <- function(is, js, nr_observations) {
+  devider <- length(is) * length(js)
+  stopifnot(nr_observations %% devider == 0)
+  nr_per_group <- nr_observations / devider
+  
+  rbind(
+    rep(is,each=nr_per_group*length(js)),
+    rep(js,nr_per_group*length(is)),
+    sample(1:nr_observations)
+  )
+}
+```
+
+For the example of the four rates of sulfamerazine (1, 2, 3, 4), and the two methods of administering them (A, B), this function could be used as:
+```{r include=TRUE}
+result <- distribute_observations(1:4, c("A", "B"), 80)
+```
+
 **b)**
+
+```{r include=FALSE}
+df.hemoglobin <- read.table("./data/hemoglobin-1.txt", header = TRUE)
+df.hemoglobin$rate <- as.factor(df.hemoglobin$rate)
+``` 
+
+To do anova, we should first check for normality for the individual levels.
+
+```{r echo=FALSE}
+par(mfrow=c(1,2))
+boxplot(df.hemoglobin$hemoglobin ~ df.hemoglobin$rate, xlab="Rate", ylab="Hemoglobin",main="Boxplot Rate")
+boxplot(df.hemoglobin$hemoglobin ~ df.hemoglobin$method, xlab="Method", ylab="Hemoglobin", main="Boxplot Method")
+```
+
+The boxplots appear as roughly normal, which is to say symmetrical around the mean and without extreme outliers.
+
+We should then also check the QQplot of the residuals:
+
+```{r echo=FALSE}
+interaction_model <- lm(hemoglobin~rate*method, df.hemoglobin)
+
+qqnorm(residuals(interaction_model), main="Normal QQ plot of residuals for Hemoglobin over Rate and Method")
+```
+This QQ plot also appears as roughly normal. With that, the two-way anova test can be done:
+
+```{r, echo=FALSE}
+anova(interaction_model)
+```
+From this test we cannot reject the null hypothesis that there is no interaction effect, with a p-value of 0.37. The rate does appear to have a significant main effect, but we should not draw a conclusion for that from two-way anova.
 
 **c)**
 
+The question was a bit hard to understand, so a TA was asked what to do, and the answer was to answer the first part of this question using the answer from B, then answer the rest using the additive model.
+
+**c1)**
+
+Based off the two-way anova results from b, it appears that the rate has the most influence over the hemoglobin. This is not, however, a good question to ask at this stage. Conclusions about the individual factors should not be drawn based of two-way anova. Instead, the indeed real answer "The rate appears to have a higher effect than the method," should be gotten from the boxplots, which show the same effect, but without the illusion of rigor.
+
+**c2)**
+
+As there was no interaction effect in the two-way anova, we should drop the interaction terms from the analysis, and create an additive model instead. To answer the further questions, we will not be needing to call anova on this, instead we simply aggregate this model with the mean. After all, we are presuming it is normal (hence us being able to use the mean as an estimator of expected value,) but we are not asking for statistical significance on which is the highest (hence not using any statistical test).
+
+
+```{r echo=FALSE}
+agg_df <- aggregate(hemoglobin ~ rate + method, data = df.hemoglobin, FUN = mean)
+highest_combination <- agg_df[which.max(agg_df$hemoglobin), ]
+```
+
+The highest combination is then simply the max of this aggregation with the mean, which is is with rate `r highest_combination$rate`, with method `r highest_combination$method`, and which yields an estimated mean of `r highest_combination$hemoglobin`.
+
+```{r echo=FALSE}
+mean_hemoglobin_rate3_methodA <- mean(df.hemoglobin$hemoglobin[df.hemoglobin$rate == 3 & df.hemoglobin$method == "A"])
+```
+
+Since we are presuming normality, the estimator of the population mean is simply the mean of the sample, which for rate 3 and method a is `r mean_hemoglobin_rate3_methodA``
+
+
+```{r echo=FALSE}
+mean_hemoglobin_by_rate <- aggregate(hemoglobin ~ rate, data = df.hemoglobin, FUN = mean)
+highest_mean_rate <- mean_hemoglobin_by_rate[which.max(mean_hemoglobin_by_rate$hemoglobin), ]
+```
+
+To get the rate with the highest mean, we simply drop the factor of method from the analysis as well, as will be further discussed in d. With this, we once again get the max like we did in the first part, which gives us a highest rate of `r highest_mean_rate$hemoglobin`, at rate `r highest_mean_rate$rate`
+
+
+
 **d)**
 
+To drop the variable method, we should first perform the two-way anova test with the aditive model, to see if we can:
+
+```{r echo=FALSE}
+anova(lm(hemoglobin ~ rate + method, data = df.hemoglobin))
+```
+The anova of the additive model shows that we can indeed drop the method as well, as we cannot reject the null hypothesis that is influences the mean with a p-value of 0.21. We should then once again check for normality by making a qq-plot of the residuals of this new model.
+
+```{r echo=FALSE}
+one_way_model <- lm(hemoglobin ~ rate, df.hemoglobin)
+qqnorm(residuals(one_way_model), main="Normal QQ plot of residuals for Hemoglobin over Rate")
+```
+
+This normality can not be presumed, as this qq-plot deviates from the line too much, going below the otherwise inferred line on both extreme sides.
+
+We will still, however, perform this one-way anova, even tough it is wrong to do so given normality of residuals cannot be presumed:
+
+```{r echo=FALSE}
+anova(one_way_model)
+```
+
+If normality would have assumable, this test would have given the conclusion that rate has a significant impact on hemoglobin values.
+
+We can still, however, get the estimated means per rate by using the aggregation from the last part of c:
+```{r, echo=FALSE}
+mean_hemoglobin_by_rate
+```
+
+
 **e)**
+
+```{r, echo=FALSE}
+kruskal.test(df.hemoglobin$hemoglobin, df.hemoglobin$rate)
+```
+The Krushkal-Wallis test is the test to perform if you want to do one-way anova, but normality cannot be presumed. It gives a less significant p-value by two orders of magnitude, which is expected even just because it makes less assumptions about the data, not presuming any distribution. Of course, it is a rank-based test, which are also less powerful (but more stable,) as they discard a lot of detail about the data, inferring only on ranks.
+
+It does, however, still come to the conclusion that the null hypothesis that the rate does not influence the hemoglobin can be rejected, in favour of the hypothesis that the rate factor influences the hemoglobin.
