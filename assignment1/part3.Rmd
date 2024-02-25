@@ -84,3 +84,14 @@ By examining the the summary of the model, we observe for starter 4 that the coe
 Therefore, the Friedman test might not be the most appropriate, as it assumes a one-dimensional array of measurements for each level of the treatment variable, and it tests whether there are differences in the distribution of values across these levels, so we might not have the necessary repeated measures structure for the Friedman test.
 
 **d)**
+
+```{r, echo=FALSE}
+mixed_model <- lmer(acidity ~ starter + (1|batch) + (1|position), data = cream.1)
+summary(mixed_model)
+```
+
+First, the fixed effect results support the original model and test analysis as we can observe that starters all starters have negative t-values, while starter 4 displays an estimated standard deviation of (2.8100) which represents the estimated difference in acidity when the starter variable is at level 4 compared to the reference level, and the large positive t-value (6.013) indicates that this estimated difference is highly significant, supporting our conclusion that starter 4 causes a significant change in the acidity of the yogurt.
+
+Second, the mixed effects analysis reveal that the difference in variance for batch is much higher than for position, which matches the original results of the model where the significance level of batch was comparably higher than that of the position. This results helps us conclude that the position of the yogurt is the least important variable in this study.
+
+Finally, the residual standard error in the fixed-effects model is 1.176, while in the mixed-effects model, it is 0.73893. The mixed-effects model seems to provide a better fit to the data, as it accounts for both fixed and random sources of variability.
