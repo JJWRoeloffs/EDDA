@@ -79,7 +79,9 @@ summary(model)
 
 By examining the the summary of the model, we observe for starter 4 that the coefficient estimate is 2.8100, and the p-value is 0.00118. The p-value is less than 0.05, indicating a significant effect of starter 4 on acidity.
 
-**c)** The Friedman test is often used when the assumptions of tests like ANOVA are not met. Nevertheless, the Friedman test is typically applied to repeated measures data, where each subject is measured under different conditions. Our data displayed a single observation for each combination of batch, position, and starter, rather than repeated measures within subjects.
+**c)**
+
+The Friedman test is often used when the assumptions of tests like ANOVA are not met. Nevertheless, the Friedman test is typically applied to repeated measures data, where each subject is measured under different conditions. Our data displayed a single observation for each combination of batch, position, and starter, rather than repeated measures within subjects.
 
 Therefore, the Friedman test might not be the most appropriate, as it assumes a one-dimensional array of measurements for each level of the treatment variable, and it tests whether there are differences in the distribution of values across these levels, so we might not have the necessary repeated measures structure for the Friedman test.
 

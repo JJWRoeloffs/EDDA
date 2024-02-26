@@ -19,6 +19,7 @@ distribute_observations <- function(is, js, nr_observations) {
 ```
 
 For the example of the four rates of sulfamerazine (1, 2, 3, 4), and the two methods of administering them (A, B), this function could be used as:
+
 ```{r include=TRUE}
 result <- distribute_observations(1:4, c("A", "B"), 80)
 ```
@@ -47,11 +48,13 @@ interaction_model <- lm(hemoglobin~rate*method, df.hemoglobin)
 
 qqnorm(residuals(interaction_model), main="Normal QQ plot of residuals for Hemoglobin over Rate and Method")
 ```
+
 This QQ plot also appears as roughly normal. With that, the two-way anova test can be done:
 
 ```{r, echo=FALSE}
 anova(interaction_model)
 ```
+
 From this test we cannot reject the null hypothesis that there is no interaction effect, with a p-value of 0.37. The rate does appear to have a significant main effect, but we should not draw a conclusion for that from two-way anova.
 
 **c)**
@@ -80,15 +83,12 @@ mean_hemoglobin_rate3_methodA <- mean(df.hemoglobin$hemoglobin[df.hemoglobin$rat
 
 Since we are presuming normality, the estimator of the population mean is simply the mean of the sample, which for rate 3 and method a is `r mean_hemoglobin_rate3_methodA``
 
-
 ```{r echo=FALSE}
 mean_hemoglobin_by_rate <- aggregate(hemoglobin ~ rate, data = df.hemoglobin, FUN = mean)
 highest_mean_rate <- mean_hemoglobin_by_rate[which.max(mean_hemoglobin_by_rate$hemoglobin), ]
 ```
 
 To get the rate with the highest mean, we simply drop the factor of method from the analysis as well, as will be further discussed in d. With this, we once again get the max like we did in the first part, which gives us a highest rate of `r highest_mean_rate$hemoglobin`, at rate `r highest_mean_rate$rate`
-
-
 
 **d)**
 
@@ -97,6 +97,7 @@ To drop the variable method, we should first perform the two-way anova test with
 ```{r echo=FALSE}
 anova(lm(hemoglobin ~ rate + method, data = df.hemoglobin))
 ```
+
 The anova of the additive model shows that we can indeed drop the method as well, as we cannot reject the null hypothesis that is influences the mean with a p-value of 0.21. We should then once again check for normality by making a qq-plot of the residuals of this new model.
 
 ```{r echo=FALSE}
@@ -115,16 +116,17 @@ anova(one_way_model)
 If normality would have assumable, this test would have given the conclusion that rate has a significant impact on hemoglobin values.
 
 We can still, however, get the estimated means per rate by using the aggregation from the last part of c:
+
 ```{r, echo=FALSE}
 mean_hemoglobin_by_rate
 ```
-
 
 **e)**
 
 ```{r, echo=FALSE}
 kruskal.test(df.hemoglobin$hemoglobin, df.hemoglobin$rate)
 ```
+
 The Krushkal-Wallis test is the test to perform if you want to do one-way anova, but normality cannot be presumed. It gives a less significant p-value by two orders of magnitude, which is expected even just because it makes less assumptions about the data, not presuming any distribution. Of course, it is a rank-based test, which are also less powerful (but more stable,) as they discard a lot of detail about the data, inferring only on ranks.
 
 It does, however, still come to the conclusion that the null hypothesis that the rate does not influence the hemoglobin can be rejected, in favour of the hypothesis that the rate factor influences the hemoglobin.

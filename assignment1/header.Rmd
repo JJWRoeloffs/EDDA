@@ -1,7 +1,7 @@
 
 ---
 title: "Assignment 1"
-author: "Andres Garcia, Lars Grootkarzijn & Jelle Roeloffs"
+author: "Andres Garcia, Lars Grootkarzijn & Jelle Roeloffs - group 50"
 date: "Febuary 26"
 output: pdf_document
 highlight: tango

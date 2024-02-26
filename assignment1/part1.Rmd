@@ -36,13 +36,16 @@ margin_of_error <- z_score * (sd_video / sqrt(length(Ice_cream.1$video)))
 lower_bound <- mean_video - margin_of_error
 upper_bound <- mean_video + margin_of_error
 ``` 
+
 The 97% Confidence Interval the 95% bootstrap confidence interval for the population mean of video is [`r ceiling(lower_bound)`, `r ceiling(upper_bound)`] with the mean `r ceiling(mean_video)`
 
 ```{r include=FALSE}
 sample_sd <- sd(Ice_cream.1$video)
 required_sample_size <- (qnorm(0.985)^2 * sample_sd^2) / (3^2)
 ``` 
+
 Calculating the minimal sample size $n$ with formula $n = \frac{(z_{\alpha/2})^2 \cdot \sigma^2}{E^2}$ for a length $E^3$ with the sample standard deviation of `r ceiling(sample_sd)` and a z-value which is found by $qnorm(0.985)$` as there is 0.015 in both tails the minimal sample size $n$ found is `r ceiling(required_sample_size)`
+
 ```{r include=TRUE}
 B <- 1000
 Tstar=numeric(B)
@@ -58,7 +61,9 @@ lower_bound <- 2*T1-Tstar15
 ``` 
 
 When bootstrapping on the video column using the above code generating 1000 values the 95% bootstrap confidence interval for the population mean of video is [`r ceiling(upper_bound)`, `r ceiling(lower_bound)`] with the mean `r ceiling(mean_video)`. When comparing these values to the earlier done CI we see the values are exactly the same.
+
 **b)** 
+
 ```{r include=FALSE}
 # Assuming your data is in a variable called 'scores'
 # H0: The mean score is equal to 50
@@ -75,9 +80,11 @@ conf_interval <- result$conf.int
 p_value <- result$p.value
 print(conf_interval)
 ``` 
+
 Looking at 1 a from the plots we can see a normal distribution which justifies the usage of a t-test. When doing a one sample t-test with $H_0$: $\mu$ is equal to 50 and $H_a$: $\mu$ is greater than 50; the following result for the p-value is found: `r p_value`. When taking a significance level of 0.05 we can thus reject the null hypothesis in favor of the alternative hypothesis $\mu$ is greater than 50. When looking at the Confidence Interval (CI) of the same alpha we can assume the lower bound, mean and upper bound are above 50 since the null hypothesis is rejected.
 
 **c)** 
+
 ```{r include=FALSE}
 # Number of observations greater than 6
 success_count <- sum(Ice_cream.1$video > 50)
@@ -109,7 +116,6 @@ When using the Wilcox signed rank test on the video column with $\mu$ = 50 and h
 When comparing these tests to the tests done in _b)_ the conclusion can be made that both the median and the mean are not above 50.
 
 When using a one sample proportion test with H0: The proportion is equal to 25% or bigger and Ha: The proportion is smaller then 25% the value `r prop_test_result$p.value` is found. When using a significance level of 0.05 the null hypothesis can thus be rejected which means that the fraction of the scores less than 42 is at most 25%.
-
 
 **d)** 
 
@@ -190,6 +196,7 @@ Of these tests, doing Man-Whitney or Kolmogorov-Smirnov makes the most sense, as
 A permutation test would not be applicable, as the dataset is not paired.
 
 **f)** 
+
 ```{r echo=FALSE}
 par(mfrow=c(1,2))
 qqnorm(Ice_cream.1$video, pch = 1, frame = FALSE, ylim = c(20, 80), main="QQ-plot of video")
