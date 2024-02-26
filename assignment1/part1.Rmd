@@ -36,8 +36,28 @@ margin_of_error <- z_score * (sd_video / sqrt(length(Ice_cream.1$video)))
 lower_bound <- mean_video - margin_of_error
 upper_bound <- mean_video + margin_of_error
 ``` 
-The 97% Confidence Interval for the mean has a lower bound of `r lower_bound` and an upper bound of `r upper_bound`
+The 97% Confidence Interval the 95% bootstrap confidence interval for the population mean of video is [`r ceiling(lower_bound)`, `r ceiling(upper_bound)`] with the mean `r ceiling(mean_video)`
 
+```{r include=FALSE}
+sample_sd <- sd(Ice_cream.1$video)
+required_sample_size <- (qnorm(0.985)^2 * sample_sd^2) / (3^2)
+``` 
+Calculating the minimal sample size $n$ with formula $n = \frac{(z_{\alpha/2})^2 \cdot \sigma^2}{E^2}$ for a length $E^3$ with the sample standard deviation of `r ceiling(sample_sd)` and a z-value which is found by $qnorm(0.985)$` as there is 0.015 in both tails the minimal sample size $n$ found is `r ceiling(required_sample_size)`
+```{r include=TRUE}
+B <- 1000
+Tstar=numeric(B)
+for(i in 1:B) {
+  Xstar=sample(Ice_cream.1$video,replace=TRUE)
+  Tstar[i]=mean(Xstar) 
+}
+T1<- mean(Tstar)
+Tstar15 <- quantile(Tstar, 0.015)
+Tstar985 <- quantile(Tstar, 0.985)
+upper_bound <- 2*T1-Tstar985
+lower_bound <- 2*T1-Tstar15
+``` 
+
+When bootstrapping on the video column using the above code generating 1000 values the 95% bootstrap confidence interval for the population mean of video is [`r ceiling(upper_bound)`, `r ceiling(lower_bound)`] with the mean `r ceiling(mean_video)`. When comparing these values to the earlier done CI we see the values are exactly the same.
 **b)** 
 ```{r include=FALSE}
 # Assuming your data is in a variable called 'scores'
@@ -181,4 +201,16 @@ qqline(Ice_cream.1$puzzle, col = "steelblue", lwd = 2)
 correlation_result <- cor.test(Ice_cream.1$video, Ice_cream.1$puzzle, method="spearman")
 ``` 
 
-When looking at the QQ-plot for puzzle it seems doubtful that it is normally distributed. Due to this reason Spearman's correlation test between the columns video and puzzle is used. The hypothessises are as followed: $H_0$: There is no correlation between the two columns and $H_a$: There is correlation between the columns. the results of the Pearson’s correlation test gives a P-value of `r correlation_result$p.value`. When using a significance level of 0.05 the conclusion can be drawn that the null hypothesis can be rejected and there is thus enough evidence to conclude that the columns puzzle and video are significantly correlated, if normality is assumed.
+When looking at the QQ-plot for puzzle it seems doubtful that it is normally distributed. Due to this reason Spearman's correlation test between the columns video and puzzle is used. The hypothesizes are as followed: $H_0$: There is no correlation between the two columns and $H_a$: There is correlation between the columns. the results of the Pearson’s correlation test gives a P-value of `r correlation_result$p.value`. When using a significance level of 0.05 the conclusion can be drawn that the null hypothesis can be rejected and there is thus enough evidence to conclude that the columns puzzle and video are significantly correlated, if normality is assumed.
+
+```{r echo=FALSE}
+wilcoxon_test_result <- wilcox.test(Ice_cream.1$puzzle, Ice_cream.1$video, paired=TRUE, alternative = "greater")
+``` 
+
+To verify if the distribution of these values is significantly different a Wilcoxon test was done. Using the following hypothesizes:
+
+Null Hypothesis: The distribution of scores in the column puzzle is equal to the distribution of scores in the column video.
+
+Alternative Hypothesis: The distribution of scores in the column puzzle is greater than the distribution of scores in the column video.
+
+The resulting p-value is `r wilcoxon_test_result$p.value`. Using a significance level of 0.05 we can thus conclude that we fail to rejecto the null hypothesis and there is generally speaking no difference in scores.
