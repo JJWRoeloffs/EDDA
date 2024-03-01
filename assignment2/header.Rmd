@@ -1,0 +1,11 @@
+
+---
+title: "Assignment 2"
+author: "Andres Garcia, Lars Grootkarzijn & Jelle Roeloffs - group 50"
+date: "March 3"
+output: pdf_document
+highlight: tango
+editor_options:
+  markdown:
+    wrap: 72
+---
