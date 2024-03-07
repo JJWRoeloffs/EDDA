@@ -1,9 +1,33 @@
 ## Exercise 1
+```{r include=FALSE}
+library(lme4) 
+fruitflies.1 <- read.table("./data/fruitflies.txt", header = TRUE)
+```
 
 **a)**
+```{r include=FALSE, echo=TRUE}
+model_a <- lm(fruitflies.1$longevity ~ fruitflies.1$activity, data = fruitflies.1)
+```
 
+When using a mixed effects model using longevity as the dependent variable and activity as the independent variable the following results are obtained:
+
+```{r echo=TRUE}
+summary(model_a)
+```
+
+When looking at the P-values of the variables $high$ (intercept), $isolated$ and $low$ both these effects are, taking into consideration a signifcance level of 0.05, considered significant. When looking at the estimated longevity we can conclude that the reference category high is 38.720 days. With isolated activity 38.720 + 24.840 = 63.560 days and finally, with low activity 38.720 + 18.040 = 56.760 days.
 **b)**
 
+
+```{r include=FALSE, echo=TRUE}
+model_b <- lm(longevity ~ activity * thorax, data = fruitflies.1)
+```
+
+When using a mixed effects model using longevity as the dependent variable and activity and thorax as the independent variable the following results are obtained:
+
+```{r echo=TRUE}
+summary(model_b)
+```
 **c)**
 
 **d)**
