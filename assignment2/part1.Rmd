@@ -2,47 +2,123 @@
 ```{r include=FALSE}
 library(lme4) 
 fruitflies.1 <- read.table("./data/fruitflies.txt", header = TRUE)
-
-# By default, it's just strings. We want a factor (in C terms: an enum)
-fruitflies.1$activity = as.factor(fruitflies.1$activity)
-
-# The assignment asks specifically to use this log. Likely because the relation is not linear.
-# It might be smart to also show this with some plots.
-# The inverse to log() (which is log e) is exp() (which is e^x) if you want to convert numbers back.
 fruitflies.1$loglongevity <- log(fruitflies.1$longevity)
 ```
 
 **a)**
 ```{r include=FALSE, echo=TRUE}
-# Mixed effect models without any block variables is just one-way anova.
-model_a <- lm(fruitflies.1$loglongevity ~ fruitflies.1$activity, data = fruitflies.1)
+
+anova_result_a <- aov(loglongevity ~ activity, data = fruitflies.1)
+
+means_by_activity <- tapply(fruitflies.1$loglongevity, fruitflies.1$activity, mean)
+estimated_longevities <- exp(means_by_activity)
+
 ```
 
-When using one-way anova using longevity as the dependent variable and activity as the independent variable the following results are obtained:
+When using a ANOVA model using log-longevity, which is added to the dataframe as an extra column, as the dependent variable and activity as the explanatory variable and the following hypothesizes:
+
+$H_0$: The mean log-longevity is the same for flies with different levels of sexual activity.
+
+$H_a$: At least one group's mean log-longevity is different from the others.
+
+The following results are obtained:
+
 
 ```{r echo=TRUE}
-anova(model_a)
+summary(anova_result_a)
 ```
 
-When looking at the P-values of the variables $high$ (intercept), $isolated$ and $low$ both these effects are, taking into consideration a signifcance level of 0.05, considered significant. When looking at the estimated longevity we can conclude that the reference category high is 38.720 days. With isolated activity 38.720 + 24.840 = 63.560 days and finally, with low activity 38.720 + 18.040 = 56.760 days.
+Considering a significance level of 0.05 we can conclude that the null hypothesis is rejected and thus that there are significant differences between at least one group's mean log-longevity from the others.
+
+Finally, the following mean longevity for each activity level are obtained:
+```{r echo=TRUE}
+
+print(estimated_longevities)
+```
 **b)**
-
-
 ```{r include=FALSE, echo=TRUE}
-# activity * thorax implies there would be an interaction term. I find this extremely unlikely, as the flies were
-# randomly selected to be in each of the groups. (Also, this wasn't a mixed effects model.)
-# Random effects also doesn't make a ton of sense, as there is only one block variable.
-# Therefore, I think it might be best to use block designs from lecture 5
-model_b <- lm(longevity ~ thorax + activity, data = fruitflies.1)
+
+anova_result_b <- aov(loglongevity ~ activity * thorax, data = fruitflies.1)
+
+#means_by_activity <- tapply(fruitflies.1$loglongevity, fruitflies.1$activity, mean)
+#estimated_longevities <- exp(means_by_activity)
 ```
 
-When using a randomised block design using longevity as the dependent variable and activity and thorax as the independent variable the following results are obtained:
+When using a ANOVA model using again log-longevity as the dependent variable and activity and thorox as the explanatory variable and the following hypothesizes:
+
+$H_0$: The mean log-longevity is the same for flies with different levels of sexual activity.
+
+$H_a$: At least one group's mean log-longevity is different from the others.
+
+The following results are obtained:
+```{r echo=TRUE}
+summary(anova_result_b)
+```
+Considering a significance level of 0.05 we can conclude that the null hypothesis is rejected for both thorax and activity and thus that there are significant differences between at least one group's mean log-longevity from the others. However, since the combined effect of thorax and activity is above the significance level 0.05 we do accept the null hypothesis and thus that the the mean log-longevity is the same for flies with different levels of sexual activity.
 
 ```{r echo=TRUE}
-anova(model_b)
+#print(results_df)
 ```
+
 **c)**
+
+
+```{r echo=FALSE}
+
+library(ggplot2)
+
+ggplot(fruitflies.1, aes(x = thorax, y = longevity, color = activity)) +
+  geom_point() +
+  labs(title = "Scatterplot Across Activity Levels",
+       x = "Thorax Length",
+       y = "Longevity",
+       color = "Activity") +
+  facet_wrap(~activity) +  # Separate plots for each activity level
+  theme_minimal()
+
+anova_result_b <- aov(longevity ~ activity * thorax, data = fruitflies.1)
+
+```
+
+When using a ANOVA model using longevity as the dependent variable and activity and thorox as the explanatory variable and the following hypothesizes:
+
+$H_0$: The mean longevity is the same for flies with different levels of sexual activity.
+
+$H_a$: At least one group's mean log-longevity is different from the others.
+
+The following results are obtained:
+```{r echo=TRUE}
+summary(anova_result_b)
+```
+
+Considering a significance level of 0.05 we can conclude that the null hypothesis is rejected for both thorax and activity and thus that there are significant differences between at least one group's mean longevity from the others. However, since the combined effect of thorax and activity is above the significance level 0.05 we fail to reject the null hypothesis and thus that the the mean log-longevity is the same for flies with different levels of sexual activity.
+
+In conclusion there seems to be correlation in the scatterplots, but there is no effect on the interaction between activity and thorax.
 
 **d)**
 
+
+As both thorax and activity are significant as found in earliers question it would be more appropriate to use both values in the selected model. Neither is per defenition wrong. In question a the model purely focusses on activity, b focusses on both sexual activity and thorax length in exploring possible effects.
+
 **e)**
+
+
+```{r echo=FALSE}
+ancova_model <- aov(longevity ~ activity + thorax, data = fruitflies.1)
+```
+
+```{r echo=TRUE}
+summary(ancova_model)
+```
+
+```{r echo=FALSE}
+residuals <- residuals(ancova_model)
+par(mfrow = c(1, 2))
+# Create a histogram of the residuals
+hist(residuals, main = "Histogram of Residuals Log", xlab = "Residuals", ylab = "Frequency", col = "lightblue", border = "black")
+
+residuals <- residuals(anova_result_b)
+hist(residuals, main = "Histogram of Residuals non-Log", xlab = "Residuals", ylab = "Frequency", col = "lightblue", border = "black")
+```
+
+Considering the fact that for both models significance levels are roughly the same and for both residuals are normally distributed there is no strong reason to use a log conversion. 
