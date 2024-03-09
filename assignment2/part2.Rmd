@@ -1,12 +1,146 @@
 ## Exercise 2
+```{r include=FALSE}
+library(car)
+library(glmnet)
+
+birthweights <- read.csv("data/Birthweight.csv", header = TRUE)
+birthweights$smoker = as.factor(birthweights$smoker)
+birthweights$lowbwt = as.factor(birthweights$lowbwt)
+birthweights$mage35 = as.factor(birthweights$mage35)
+```
 
 **a)**
+The model of interest is:
+```{r}
+model_2a <- lm(
+  Birthweight~Length+Headcirc+Gestation+mage+mnocig+mheight+mppwt+fage+fedyrs+fnocig+fheight,
+  data=birthweights
+)
+```
+
+To inspect influence point an colenearity, the easiest way is with a pairs plot. There are a lot of variables, so it's a bit hard to see all of it, but it gets the main point across.
+```{r echo=FALSE}
+birthweights_a <- subset(
+  birthweights,
+  select = c("Birthweight", "Length", "Headcirc", "Gestation", "mage", "mnocig", "mheight", "mppwt", "fage", "fedyrs", "fnocig", "fheight")
+)
+pairs(birthweights_a, gap=0.1, pch = 18)
+```
+
+From this pairs plot, we can see several things. First of all, we can try to spot lines for colinearity, which do appear to exist. Mainly `mheight`and `mppwt`, but also `fage` and `mage` appear to relate to each other, but `Length` and `Headcirc` and `Length` and `Gestation` also appear to have a small effect between them. As for leverage points, `mncoig` appears to have a high value, and same for `mppwt`
+
+To properly test for colinearity, we need to compute the _VIF_-values:
+```{r}
+vif(model_2a)
+```
+As none of these values are over 5 (though some indeed are close,) we can presume none of them are too correlated to each other.
+
+To test if the candidate influence points are that, we need to know what points they are, which we can find out either by using R code or by just using the csv-inspector on Rstudio. Using the second, you can find that the max of `mncoig` is 50 at index 42, to a second of 35 and a low of 0, and that the max of `mppwt` is 78 to a second of 70 and a low of 45 at index 35
+
+This gives us an hypothesis we can try to confirm by plotting cook's distance on the data points:
+```{r echo=FALSE}
+plot(cooks.distance(model_2a))
+```
+
+This plot shows that, tough these individual points do indeed have a high value on some axis, it is not enough to classify them as influence points, as none of the cook's distances are (even close to) higher than 1.
+
 
 **b)**
 
+To use the step-down model, we check how significant the variables are, and remove the most insignificant if any are not significant. To start with, we need to know the current significantce values:
+```{r echo=FALSE}
+summary(model_2a)
+```
+
+The most insignificant is `mhight`, so that one will be removed first. After that, `fage`, `fedyrs`, `fnocig`, `mnocig`, `Length`, `fheight`, `mage`, and finally `mppwt`, leaving us with a model that only has `Headcirc`, and `Gestation`, and both with a sensible positive $\beta$.
+
+```{r echo=FALSE}
+model_2b <- lm(Birthweight~Headcirc+Gestation, data=birthweights)
+summary(model_2b)
+```
+
+For these, we once again have to test all the assumptions. To start with, we should qq-plot the residuals:
+```{r echo=FALSE}
+qqnorm(residuals(model_2b))
+```
+
+This plot, considering the small amount of data, looks roughly normal, tough the outliers are kind of outlier-y.
+
+After this, we should check for influence points and colinearity, and as we have already scatterplotted, we presume nothing should be a problem. However, we will still get the VIF and cooks' distances, which again show no issue:
+
+```{r echo=FALSE}
+vif(model_2b)
+```
+
+```{r echo=FALSE}
+plot(cooks.distance(model_2b))
+```
+The most interesting part of this resulting model is that, looking at the scatter plot, the main factor of influence should have been `Length`. However, it was eventually dropped. The second thing that seems interesting is that the $R^2$ did not go down that much, going from 7.2 to 6.9, showing those other observations were indeed mostly uninteresting.
+
 **c)**
 
+To get a confidence and prediction interval for the two means, we create some new data with those means, and then use the `predict` function with the "confidence" and "prediction" flags to get the intervals:
+
+```{r echo=FALSE}
+new_data <- data.frame(
+  Headcirc = mean(birthweights$Headcirc),
+  Gestation = mean(birthweights$Gestation)
+)
+
+print("Confidence Interval:")
+predict(model_2b, newdata = new_data, interval = "confidence", level = 0.95)
+
+print("Prediction Interval:")
+predict(model_2b, newdata = new_data, interval = "prediction", level = 0.95)
+```
+
 **d)**
+```{r echo=FALSE}
+not_in_x <- names(birthweights_a) %in% c('ID', 'Birthweight')
+
+x <- as.matrix(birthweights_a[, !not_in_x])
+y <- birthweights_a[,c("Birthweight")]
+
+# A train-test-split for the comparisons
+train <- sample(1:nrow(x), 0.67*nrow(x)) 
+x.train <- x[train,]
+y.train <- y[train]
+x.test <- x[-train,]
+y.test <- y[-train]
+
+lm.model.a <- lm(
+  Birthweight~Length+Headcirc+Gestation+mage+mnocig+mheight+mppwt+fage+fedyrs+fnocig+fheight,
+  data=birthweights,
+  subset=train
+)
+
+lm.model.b <- lm(Birthweight~Headcirc+Gestation, data=birthweights, subset=train)
+```
+
+Before we perform lasso, we should first get the MSE for only the original models (the full one from a and the stepped-down one from b), and do this by splitting the data into a train and test partition to make sure we are not evaluating on our training set:
+
+```{r}
+y.predict.lm.a <- predict(lm.model.a, newdata=birthweights_a[-train,]) 
+mse.lm.a <- mean((y.test-y.predict.lm.a)^2); mse.lm.a
+
+y.predict.lm.b <- predict(lm.model.b, newdata=birthweights_a[-train,]) 
+mse.lm.b <- mean((y.test-y.predict.lm.b)^2); mse.lm.b
+```
+
+From this, we find that the model from b does better when working with a train-test split, though expected, this can be seen as an extension to the results from question b.
+
+After that, we can apply lasso to find a few model
+
+```{r}
+library(glmnet)
+lasso.model <- glmnet(x.train,y.train,alpha=1) # alpha=1 for lasso
+
+lasso.cv <- cv.glmnet(x.train, y.train,alpha=1, type.measure="mse", nfolds=5)
+
+y.predict.lasso <- predict(lasso.model, newx=as.matrix(x.test), s=lasso.cv$lambda.1se)
+mse.lasso <- mean((y.test-y.predict.lasso)^2); mse.lasso
+```
+Interestingly, the resulting mean squared error is higher from the lasso model than it was from the linear model with everything included (with lasso being between 0.15 and 0.40 depending on the run). This is quite peculiar, as lasso is supposed to be quite good. 
 
 **e)**
 
