@@ -1,7 +1,40 @@
 ## Exercise 3
 
+```{r include=FALSE}
+if(!require(MASS)){install.packages("MASS")}
+library(MASS)
+data <- read.table("./data/awards.txt", header=TRUE)
+data$prog <- as.factor(data$prog)
+```
+
 **a)**
 
-**b)**
+```{r include=FALSE}
+model <- glm(num_awards ~ prog, data=data, family=poisson)
+summary(model)
+estimates <- coef(summary(model))[,1]
+exp(estimates)  
+```
+
+The results of the estimates reveal that program type 2 seems to be associated with the highest estimated number of awards (2 times the reference category) followed by program type 3 (1.5 times). This is further supported by examining the results of the poisson models summary, where the p-value for program 2 is 0.00106, therefore we can reject the null hypothesis and conclude that there's a statistically significant difference in the number of awards received by students in program 2.
+
+**b)** Kruskall-Wallis could be used if the data does not follow a poisson distribution, as it is a non-parametric test. We can analyze a histogram of the data, which reveals that the data indeed seems to follow a poisson distribution with a small value for lambda. Additionally,in this case, we are dealing with count data (the number of awards) and the Poisson regression model is specifically designed for count data.
+
+```{r }
+hist(data$num_awards, breaks=seq(0,20, by=1), 
+     main="Distribution of Number of Awards", 
+     xlab = "Awards")
+```
+
+The Poisson regression model directly models the distribution of count data, taking into account the inherent characteristics of count outcomes. Finally, we can still run the test, which shows a p-value of, 0.00462, further fortifying our claim in part a, but since it does not give insights into the specific p-values for each program, it makes this test unfit to answer question a, specially since the test does not produce coefficients in the same way poisson does, which makes it hard to use traditional estimation methods.
+
+```{r include=FALSE}
+# Kruskall-Wallis test
+kruskal.test(num_awards ~ prog, data = data)
+```
 
 **c)**
+
+```{r }
+
+```
