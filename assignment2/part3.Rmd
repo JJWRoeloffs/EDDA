@@ -37,4 +37,21 @@ kruskal.test(num_awards ~ prog, data = data)
 
 ```{r }
 
+model_interaction <- glm(num_awards ~ prog * math, data = data, family = poisson)
+summary(model_interaction)
 ```
+
+Based on the p-values, none of the coefficients or interaction terms are statistically significant. These results suggest that, based on the model and with the current data, there's no statistically significant evidence to show a clear difference in the number of awards between program types (1, 2, and 3) when holding math score constant. Additionally, the effect of math score itself and its interaction with program types don't seem to be statistically significant in this model.
+
+```{r }
+
+new_data <- expand.grid(prog = levels(data$prog), math = 56)
+predicted_awards <- predict(model_interaction, newdata = new_data, type = "response")
+
+# Combine the predictions with the input data
+predictions_df <- cbind(new_data, Predicted_Awards = predicted_awards)
+print(predictions_df)
+
+```
+
+The second program carried the highest estimated awards with 1.0379350
