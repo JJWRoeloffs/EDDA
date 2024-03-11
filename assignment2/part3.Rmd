@@ -39,7 +39,7 @@ Finally, we can still run the test, which shows a p-value of, 0.00462, further f
 
 **c)**
 
-```{r }
+```{r echo=FALSE}
 model_interaction <- glm(num_awards ~ prog * math, data = data, family = poisson)
 summary(model_interaction)
 ```

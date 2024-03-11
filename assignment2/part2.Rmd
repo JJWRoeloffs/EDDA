@@ -40,7 +40,7 @@ As none of these values are over 5 (though some indeed are close,) we can presum
 To test if the candidate influence points are that, we need to know what points they are, which we can find out either by using R code or by just using the csv-inspector on Rstudio. Using the second, you can find that the max of `mncoig` is 50 at index 42, to a second of 35 and a low of 0, and that the max of `mppwt` is 78 to a second of 70 and a low of 45 at index 35
 
 This gives us an hypothesis we can try to confirm by plotting cook's distance on the data points:
-```{r echo=FALSE}
+```{r echo=FALSE, out.width="50%"}
 plot(cooks.distance(model_2a))
 ```
 
@@ -51,18 +51,22 @@ This plot shows that, tough these individual points do indeed have a high value 
 
 To use the step-down model, we check how significant the variables are, and remove the most insignificant if any are not significant. To start with, we need to know the current significantce values:
 ```{r echo=FALSE}
-summary(model_2a)
+res <- summary(model_2a)
+
+res$coefficients
 ```
 
 The most insignificant is `mhight`, so that one will be removed first. After that, `fage`, `fedyrs`, `fnocig`, `mnocig`, `Length`, `fheight`, `mage`, and finally `mppwt`, leaving us with a model that only has `Headcirc`, and `Gestation`, and both with a sensible positive $\beta$.
 
 ```{r echo=FALSE}
 model_2b <- lm(Birthweight~Headcirc+Gestation, data=birthweights)
-summary(model_2b)
+res <- summary(model_2b)
+
+res$coefficients
 ```
 
 For these, we once again have to test all the assumptions. To start with, we should qq-plot the residuals:
-```{r echo=FALSE}
+```{r echo=FALSE, out.width="50%"}
 qqnorm(residuals(model_2b))
 ```
 
@@ -74,7 +78,7 @@ After this, we should check for influence points and colinearity, and as we have
 vif(model_2b)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, out.width="50%"}
 plot(cooks.distance(model_2b))
 ```
 The most interesting part of this resulting model is that, looking at the scatter plot, the main factor of influence should have been `Length`. However, it was eventually dropped. The second thing that seems interesting is that the $R^2$ did not go down that much, going from 7.2 to 6.9, showing those other observations were indeed mostly uninteresting.
@@ -168,7 +172,9 @@ Throwing away some data, and instead looking at `lowbwt` (which I think just mea
 
 ```{r echo=FALSE}
 model_2f <- glm(lowbwt~mage35+Gestation+smoker, family=binomial, data=birthweights_b)
-summary(model_2f)
+res <- summary(model_2f)
+
+res$coefficients
 ```
 
 From this model, it appears `mage35` and `smoker`, do not have the most effect on the final weight. More specifically, it appears that being above the age of 35 as a parent or smoking as a parent does not have an effect on the odds of your baby being below the weight of 2.5.
@@ -178,13 +184,17 @@ Adding the interaction effect of Gestation and smoker to the model:
 
 ```{r echo=FALSE}
 model_2g1 <- glm(lowbwt~mage35+Gestation+smoker+Gestation:smoker, family=binomial, data=birthweights_b)
-summary(model_2g1)
+res <- summary(model_2g1)
+
+res$coefficients
 ```
 Or adding the interaction effect of Gestation and mage35 to the model:
 
 ```{r echo=FALSE}
 model_2g2 <- glm(lowbwt~mage35+Gestation+smoker+Gestation:mage35, family=binomial, data=birthweights_b)
-summary(model_2g2)
+res <- summary(model_2g2)
+
+res$coefficients
 ```
 
 Neither seems a good idea. For both the p-value is far higher than any reasonable alpha.
@@ -193,7 +203,9 @@ With that, it appears that a reasonable model to chose might be to step down onc
 
 ```{r echo=FALSE}
 model_2g3 <- glm(lowbwt~Gestation+smoker, family=binomial, data=birthweights_b)
-summary(model_2g3)
+res <- summary(model_2g3)
+
+res$coefficients
 ```
 
 This model makes sense intellectually, with a higher probability of being a smoker as a parent leading to a higher change of a lighter baby, and a longer time in the womb leaving for a lower change of a higher baby. Stepping down once further could be done, but with a data set that includes only 6 positives, it is not unreasonable to say that an $\alpha$ of 0.1 is all you can ask for, and, for more significance, need a larger data set.
