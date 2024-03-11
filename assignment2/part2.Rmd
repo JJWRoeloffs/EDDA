@@ -81,6 +81,7 @@ vif(model_2b)
 ```{r echo=FALSE, out.width="50%"}
 plot(cooks.distance(model_2b))
 ```
+
 The most interesting part of this resulting model is that, looking at the scatter plot, the main factor of influence should have been `Length`. However, it was eventually dropped. The second thing that seems interesting is that the $R^2$ did not go down that much, going from 7.2 to 6.9, showing those other observations were indeed mostly uninteresting.
 
 **c)**
@@ -164,6 +165,7 @@ par(mfrow=c(1,2))
 boxplot(birthweights_b$Birthweight ~ birthweights_b$mage35, xlab = "Parent age above 35?", ylab="Weight")
 boxplot(birthweights_b$Birthweight ~ birthweights_b$smoker, xlab = "Parent is a smoker", ylab="Weight")
 ```
+
 Looking at these boxplots, it appears that older parents and parents above the age of 35 and parents who smoke both reduce the weight of the baby. (more plots? maybe, cannot think of any...)
 
 **f)**

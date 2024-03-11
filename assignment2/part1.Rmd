@@ -22,13 +22,10 @@ ggplot(fruitflies.1, aes(x = activity, y = loglongevity)) +
        x = "Group",
        y = "Log(Longevity)")
 ```
-
+To test if sexual activity influences longlevity, the most obvious model to use is anova. When using this model, we would be presuming the residuals are normally distributed, which are plotted here:
 
 ```{r echo=FALSE}
 anova_result_a <- aov(loglongevity ~ activity, data = fruitflies.1)
-
-means_by_activity <- tapply(fruitflies.1$loglongevity, fruitflies.1$activity, mean)
-estimated_longevities <- exp(means_by_activity)
 residuals_anova <- residuals(anova_result_a)
 
 par(mfrow = c(1, 2))  # Create a 2x2 grid for plots
@@ -37,7 +34,9 @@ hist(residuals_anova, main = "Histogram of Residuals", xlab = "Residuals")  # Hi
 qqnorm(residuals_anova); qqline(residuals_anova)  # Q-Q plot
 ```
 
-When using a ANOVA model, justified by the above graphs which indicate a normal distribution, using log-longevity, which is added to the dataframe as an extra column, as the dependent variable and activity as the explanatory variable and the following hypothesizes:
+With this data, normality is dubious. So, instead of anova, we decided to use the Krushkal-Wallis, which is a rank-based alternative to anova.
+
+When using a Krushkal-Wallis test, using log-longevity, which is added to the dataframe as an extra column, as the dependent variable and activity as the explanatory variable and the following hypothesizes:
 
 $H_0$: The mean log-longevity is the same for flies with different levels of sexual activity.
 
@@ -47,22 +46,19 @@ The following results are obtained:
 
 
 ```{r echo=FALSE}
-summary(anova_result_a)
+kruskal.test(fruitflies.1$loglongevity, fruitflies.1$activity)
 ```
 
 Considering a significance level of 0.05 we can conclude that the null hypothesis is rejected and thus that there are significant differences between at least one group's mean log-longevity from the others.
 
 Finally, the following mean longevity for each activity level are obtained:
-```{r echo=FALSE}
-estimated_longevities
+```{r}
+tapply(fruitflies.1$longevity, fruitflies.1$activity, mean)
 ```
 **b)**
 
-```{r}
-anova_result_b <- aov(loglongevity ~ activity + thorax, data = fruitflies.1)
-```
-
 ```{r echo=FALSE}
+anova_result_b <- aov(loglongevity ~ activity + thorax, data = fruitflies.1)
 residuals_anova <- residuals(anova_result_b)
 
 par(mfrow = c(1, 2))  # Create a 2x2 grid for plots
@@ -71,7 +67,9 @@ hist(residuals_anova, main = "Histogram of Residuals", xlab = "Residuals")  # Hi
 qqnorm(residuals_anova); qqline(residuals_anova)  # Q-Q plot
 
 ```
-When using a ANOVA model using again log-longevity as the dependent variable and activity and thorox as the explanatory variable and the following hypothesizes:
+After the Thorax variable is added, normality of residuals seems more presumable, unlike in a.
+
+When using a ANOVA model (Specifically randomized block design) using again log-longevity as the dependent variable and activity and thorax as the explanatory variable and the following hypothesizes:
 
 $H_0$: The mean log-longevity is the same for flies with different levels of sexual activity.
 
@@ -91,10 +89,11 @@ coef_activity_low <- 0.2857017
 coef_thorax <- 2.9789877
 ```
 
-```{r echo=TRUE}
-coefficients <- coef(anova_result_b)
-print(coefficients)
+```{r}
+coef(anova_result_b)
+```
 
+```{r}
 mean_thorax <- mean(fruitflies.1$thorax)
 
 longevity_isolated <- exp(intercept + coef_activity_isolated + coef_thorax * mean_thorax)
