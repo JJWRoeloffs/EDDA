@@ -15,6 +15,21 @@ estimated_longevities <- exp(means_by_activity)
 
 ```
 
+```{r echo=FALSE}
+# Load necessary libraries
+library(ggplot2)
+
+# Add a column for log-transformed longevity
+fruitflies.1$loglongevity <- log(fruitflies.1$longevity)
+
+# Create a boxplot or violin plot
+ggplot(fruitflies.1, aes(x = activity, y = loglongevity)) +
+  geom_boxplot() +
+  ylim(2.5, 4.5) +  # Set y-axis limits
+  labs(title = "Effect of Sexual Activity on Longevity of Fruit Flies",
+       x = "Group",
+       y = "Log(Longevity)")
+```
 When using a ANOVA model using log-longevity, which is added to the dataframe as an extra column, as the dependent variable and activity as the explanatory variable and the following hypothesizes:
 
 $H_0$: The mean log-longevity is the same for flies with different levels of sexual activity.
@@ -38,7 +53,7 @@ print(estimated_longevities)
 **b)**
 ```{r include=FALSE, echo=TRUE}
 
-anova_result_b <- aov(loglongevity ~ activity * thorax, data = fruitflies.1)
+anova_result_b <- aov(loglongevity ~ activity + thorax, data = fruitflies.1)
 
 #means_by_activity <- tapply(fruitflies.1$loglongevity, fruitflies.1$activity, mean)
 #estimated_longevities <- exp(means_by_activity)
@@ -54,11 +69,28 @@ The following results are obtained:
 ```{r echo=TRUE}
 summary(anova_result_b)
 ```
-Considering a significance level of 0.05 we can conclude that the null hypothesis is rejected for both thorax and activity and thus that there are significant differences between at least one group's mean log-longevity from the others. However, since the combined effect of thorax and activity is above the significance level 0.05 we do accept the null hypothesis and thus that the the mean log-longevity is the same for flies with different levels of sexual activity.
+Considering a significance level of 0.05 we can conclude that the null hypothesis is rejected for both thorax and activity and thus that there are significant differences between at least one group's mean log-longevity from the others.
+
+```{r echo=FALSE}
+# Given coefficients
+intercept <- 1.2189341
+coef_activity_isolated <- 0.4099810
+coef_activity_low <- 0.2857017
+coef_thorax <- 2.9789877
+```
 
 ```{r echo=TRUE}
-#print(results_df)
+coefficients <- coef(anova_result_b)
+print(coefficients)
+
+mean_thorax <- mean(fruitflies.1$thorax)
+
+longevity_isolated <- exp(intercept + coef_activity_isolated + coef_thorax * mean_thorax)
+longevity_low <- exp(intercept + coef_activity_low + coef_thorax * mean_thorax)
+longevity_high <- exp(intercept + coef_thorax * mean_thorax)
 ```
+
+The mean thorax across the whole population is `r mean_thorax`. Now using the above linear regression we find the estimates are `r longevity_isolated` days for isolated activity, `r longevity_low` days for low activity and `r longevity_high` days for high activity.
 
 **c)**
 
