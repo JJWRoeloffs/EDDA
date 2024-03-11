@@ -19,6 +19,8 @@ model_2a <- lm(
 ```
 
 To inspect influence point an colenearity, the easiest way is with a pairs plot. There are a lot of variables, so it's a bit hard to see all of it, but it gets the main point across.
+
+
 ```{r echo=FALSE}
 birthweights_a <- subset(
   birthweights,
