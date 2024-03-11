@@ -20,10 +20,10 @@ ggplot(fruitflies.1, aes(x = activity, y = longevity)) +
   ylim(0, 100) +  # Set y-axis limits
   labs(title = "Effect of Sexual Activity on Longevity of Fruit Flies",
        x = "Group",
-       y = "Log(Longevity)")
+       y = "Longevity")
 ```
 
-Looking at the boxplots both isolated and low seem to be symmetric, with low having one outlier. High is negatively skewed with one outlier. 
+Looking at the boxplots high is clearly symmetrical. Looking at isolated there is a positive skew. The box itself is symmetrical. Low is negatively skewed. Comparing the boxplots to each other there is a clear difference between the distribution of high and isolated, and high and low. Isolated and low do have some overlapping.
 
 To test if sexual activity influences longlevity, the most obvious model to use is anova. When using this model, we would be presuming the residuals are normally distributed, which are plotted here:
 
