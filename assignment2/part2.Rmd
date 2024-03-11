@@ -144,10 +144,77 @@ Interestingly, the resulting mean squared error is higher from the lasso model t
 
 **e)**
 
+```{r echo=FALSE}
+birthweights_b <- subset(
+  birthweights,
+  select = c("Birthweight", "lowbwt", "Gestation", "mage35", "smoker")
+)
+```
+
+Given that both `mage35` and `smoker` appear to be binary (factor) columns, comparing the general trend via boxplot might be the best idea:
+
+```{r echo=FALSE}
+par(mfrow=c(1,2))
+boxplot(birthweights_b$Birthweight ~ birthweights_b$mage35, xlab = "Parent age above 35?", ylab="Weight")
+boxplot(birthweights_b$Birthweight ~ birthweights_b$smoker, xlab = "Parent is a smoker", ylab="Weight")
+```
+Looking at these boxplots, it appears that older parents and parents above the age of 35 and parents who smoke both reduce the weight of the baby. (more plots? maybe, cannot think of any...)
+
 **f)**
 
+Throwing away some data, and instead looking at `lowbwt` (which I think just means a weight below 2.5, but I cannot find that documented anywhere,) we can make the logistic regression: 
+
+```{r echo=FALSE}
+model_2f <- glm(lowbwt~mage35+Gestation+smoker, family=binomial, data=birthweights_b)
+summary(model_2f)
+```
+
+From this model, it appears `mage35` and `smoker`, do not have the most effect on the final weight. More specifically, it appears that being above the age of 35 as a parent or smoking as a parent does not have an effect on the odds of your baby being below the weight of 2.5.
+
 **g)**
+Adding the interaction effect of Gestation and smoker to the model:
+
+```{r echo=FALSE}
+model_2g1 <- glm(lowbwt~mage35+Gestation+smoker+Gestation:smoker, family=binomial, data=birthweights_b)
+summary(model_2g1)
+```
+Or adding the interaction effect of Gestation and mage35 to the model:
+
+```{r echo=FALSE}
+model_2g2 <- glm(lowbwt~mage35+Gestation+smoker+Gestation:mage35, family=binomial, data=birthweights_b)
+summary(model_2g2)
+```
+
+Neither seems a good idea. For both the p-value is far higher than any reasonable alpha.
+
+With that, it appears that a reasonable model to chose might be to step down once from (f), and include only Gestation and smoker:
+
+```{r echo=FALSE}
+model_2g3 <- glm(lowbwt~Gestation+smoker, family=binomial, data=birthweights_b)
+summary(model_2g3)
+```
+
+This model makes sense intellectually, with a higher probability of being a smoker as a parent leading to a higher change of a lighter baby, and a longer time in the womb leaving for a lower change of a higher baby. Stepping down once further could be done, but with a data set that includes only 6 positives, it is not unreasonable to say that an $\alpha$ of 0.1 is all you can ask for, and, for more significance, need a larger data set.
 
 **h)**
+```{r}
+new_data <- data.frame(
+  Gestation = 40,
+  smoker = as.factor(c(0, 1))
+)
+
+predicted_probabilities <- predict(model_2g3, newdata = new_data, type = "response")
+```
+
+Based of the final model from f, the probability of a birthright of below 2.5 as a non-smoker with a gestation of 40 is `r predicted_probabilities[1]`, and the same as a smoker is `r predicted_probabilities[1]`. This makes intellectual sense, as the total amount of positive lowbwt values is very low, and 5/6 are from smokers.
 
 **i)**
+
+The contingency table does not make a ton of sense, as we know Gestation plays a significant role, and, if a model is the goal, not including something we know is a factor in it is always a mistake. However, doing a fisher test on only lowbwt and smoker is not meaningless. In fact, if "Does smoking as a parent influence the chance of a child having a birth weight below 2.5" was the original research question, this would have been exactly the right test to do from the start, as we can do a fisher test to calculate the exact p-value.
+
+```{r echo=FALSE}
+contigencytable_2i <- table(birthweights_b$smoker, birthweights_b$lowbwt)
+fisher.test(contigencytable_2i)
+```
+
+This test returns a relatively large p-value, indicating that the null hypothesis that `smoker` does not influence `lowbwt` cannot be rejected based of this data.
