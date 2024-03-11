@@ -6,14 +6,6 @@ fruitflies.1$loglongevity <- log(fruitflies.1$longevity)
 ```
 
 **a)**
-```{r include=FALSE, echo=TRUE}
-
-anova_result_a <- aov(loglongevity ~ activity, data = fruitflies.1)
-
-means_by_activity <- tapply(fruitflies.1$loglongevity, fruitflies.1$activity, mean)
-estimated_longevities <- exp(means_by_activity)
-
-```
 
 ```{r echo=FALSE}
 # Load necessary libraries
@@ -30,7 +22,24 @@ ggplot(fruitflies.1, aes(x = activity, y = loglongevity)) +
        x = "Group",
        y = "Log(Longevity)")
 ```
-When using a ANOVA model using log-longevity, which is added to the dataframe as an extra column, as the dependent variable and activity as the explanatory variable and the following hypothesizes:
+
+
+```{r echo=FALSE}
+
+anova_result_a <- aov(loglongevity ~ activity, data = fruitflies.1)
+
+means_by_activity <- tapply(fruitflies.1$loglongevity, fruitflies.1$activity, mean)
+estimated_longevities <- exp(means_by_activity)
+residuals_anova <- residuals(anova_result_a)
+
+par(mfrow = c(1, 2))  # Create a 2x2 grid for plots
+
+hist(residuals_anova, main = "Histogram of Residuals", xlab = "Residuals")  # Histogram
+qqnorm(residuals_anova); qqline(residuals_anova)  # Q-Q plot
+
+```
+
+When using a ANOVA model, justified by the above graphs which indicate a normal distribution, using log-longevity, which is added to the dataframe as an extra column, as the dependent variable and activity as the explanatory variable and the following hypothesizes:
 
 $H_0$: The mean log-longevity is the same for flies with different levels of sexual activity.
 
@@ -59,6 +68,15 @@ anova_result_b <- aov(loglongevity ~ activity + thorax, data = fruitflies.1)
 #estimated_longevities <- exp(means_by_activity)
 ```
 
+```{r echo=FALSE}
+residuals_anova <- residuals(anova_result_b)
+
+par(mfrow = c(1, 2))  # Create a 2x2 grid for plots
+
+hist(residuals_anova, main = "Histogram of Residuals", xlab = "Residuals")  # Histogram
+qqnorm(residuals_anova); qqline(residuals_anova)  # Q-Q plot
+
+```
 When using a ANOVA model using again log-longevity as the dependent variable and activity and thorox as the explanatory variable and the following hypothesizes:
 
 $H_0$: The mean log-longevity is the same for flies with different levels of sexual activity.
